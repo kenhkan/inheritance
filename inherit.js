@@ -160,6 +160,24 @@ merge = function( original, introduced, context, key ) {
       }
     }
 
+    // Add a `create()` method so you can create truly separate instances
+    /*
+      Create a truly separate instance from this class
+
+      Modified from [Use of .apply() with 'new' operator. Is this possible?](http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible/#1608546)
+
+      @param args* The argument list to be passed to the constructor
+      @returns {Class} An instance of this class
+    */
+    Class.prototype.create = function() {
+      var args = _.toArray(arguments);
+      var ctor = this.constructor;
+      var C = function() { ctor.apply(this, args); }
+
+      C.prototype = copy(this);
+      return new C;
+    };
+
     // Return the merged function class
     ret( Class );
   }
