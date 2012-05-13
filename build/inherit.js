@@ -1,11 +1,11 @@
-_ = require("lib/underscore");
-owl = require("lib/deep_copy");
+_ = require("./underscore");
+owl = require("./deep_copy");
 
 // Deep copying
 //
 // @param {Object} original The object to copy
 // @returns {Object} A copy of the original object
-_.copy = owl.deepCopy;
+copy = owl.deepCopy;
 
 // Merge a value (`original`) by introducing another value (`introduced`) and "return" the result in Continuation-Passing Style (CPS).
 //
@@ -35,7 +35,7 @@ _.copy = owl.deepCopy;
 // @param introduced The introduced value
 // @param {Object} context The result of the merge will be stored into the property by the name of the next parameter in this object
 // @param {String} key This is the key of the context to store the merge in
-_.merge = function( original, introduced, context, key ) {
+merge = function( original, introduced, context, key ) {
 
   var ret = function( value ) {
     context[key] = value;
@@ -44,19 +44,19 @@ _.merge = function( original, introduced, context, key ) {
   // If either one is undefined or null, no need to merge, just copy the other one over
   if( _.isUndefined( original ) || _.isNull( original ) ||
       _.isUndefined( introduced ) || _.isNull( introduced ) ) {
-    ret( _.copy( original || introduced || null ) );
+    ret( copy( original || introduced || null ) );
   }
 
   // If they're both arrays, concatenate them
   else if( Object.prototype.toString.apply( original ) === '[object Array]' &&
            Object.prototype.toString.apply( introduced ) === '[object Array]' ) {
-    ret( _.copy( original.concat( introduced ) ) );
+    ret( copy( original.concat( introduced ) ) );
   }
 
   // If they're both strings, prefer `introduced`
   else if( Object.prototype.toString.apply( original ) === '[object String]' &&
            Object.prototype.toString.apply( introduced ) === '[object String]' ) {
-    ret( _.copy( introduced ) );
+    ret( copy( introduced ) );
   }
 
   // If they're both objects, merge down
@@ -110,7 +110,7 @@ _.merge = function( original, introduced, context, key ) {
 
       // Merge otherwise
       else {
-        _.merge( original[k], introduced[k], obj, k );
+        merge( original[k], introduced[k], obj, k );
       }
     }
 
@@ -118,13 +118,13 @@ _.merge = function( original, introduced, context, key ) {
     for( i=0, len=oUniqKeys.length; i<len; i++ ) {
       k = oUniqKeys[i];
 
-      obj[k] = _.copy( original[k] );
+      obj[k] = copy( original[k] );
     }
 
     for( i=0, len=iUniqKeys.length; i<len; i++ ) {
       k = iUniqKeys[i];
 
-      obj[k] = _.copy( introduced[k] );
+      obj[k] = copy( introduced[k] );
     }
 
     // Return
@@ -136,6 +136,8 @@ _.merge = function( original, introduced, context, key ) {
            typeof introduced === 'function' &&
            ( original.prototype.isClass === true ||
              introduced.prototype.isClass === true ) ) {
+    var staticKeys, staticKey, i, len;
+
     // Create child function object
     function Class() {
       // Call constructors
@@ -144,10 +146,22 @@ _.merge = function( original, introduced, context, key ) {
     }
 
     // Merge the prototypes
-    _.merge( original.prototype, introduced.prototype, Class, 'prototype' );
+    merge( original.prototype, introduced.prototype, Class, 'prototype' );
 
     // Set constructor
     Class.prototype.constructor = Class;
+
+    // Merge its class properties but cannot use `merge()` because it'd trigger a stack overflow
+    ks = _.union( Object.keys(original), Object.keys(introduced) );
+
+    for( i=0, len=ks.length; i<len; i++ ) {
+      k = ks[i];
+
+      // Prototype has been copied over through merging
+      if( k !== 'prototype' ) {
+        merge( original[k], introduced[k], Class, k );
+      }
+    }
 
     // Return the merged function class
     ret( Class );
@@ -155,18 +169,18 @@ _.merge = function( original, introduced, context, key ) {
 
   // Otherwise, copy over `introduced` as it takes precedence
   else {
-    ret( _.copy( introduced ) );
+    ret( copy( introduced ) );
   }
 };
 
 // Provide multiple inheritance of a bunch of objects. Return the combined object.
 //
-// This builds on top of `_.merge()`. It allows the child to inherit from multiple parents by chaining merges. It is also a wrapper to make it more user-friendly by using the regular `return` mechanism rather than CPS.
+// This builds on top of `merge()`. It allows the child to inherit from multiple parents by chaining merges. It is also a wrapper to make it more user-friendly by using the regular `return` mechanism rather than CPS.
 //
-// @see _.merge
+// @see merge
 // @param {Object} sources[] The parent objects
 // @returns {Object} The child object
-module.exports = function() {
+inherit = function() {
   var i, len, a, b, c;
   var container;
   var sources;
@@ -181,7 +195,7 @@ module.exports = function() {
   for(i=1, len=sources.length; i<len; i++) {
     b = sources[i]; // Next source
 
-    _.merge( a, b, c, "result" ); // Merge
+    merge( a, b, c, "result" ); // Merge
 
     // For next iteration
     a = c.result;
@@ -190,3 +204,6 @@ module.exports = function() {
   // Result
   return a;
 };
+
+
+module.exports = inherit
