@@ -1,6 +1,3 @@
-_ = require("lib/underscore");
-owl = require("lib/deep_copy");
-
 // Deep copying
 //
 // @param {Object} original The object to copy
