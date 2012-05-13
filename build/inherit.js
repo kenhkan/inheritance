@@ -1,5 +1,5 @@
-_ = require("./underscore");
-owl = require("./deep_copy");
+_ = require("lib/underscore");
+owl = require("lib/deep_copy");
 
 // Deep copying
 //
