@@ -60,7 +60,7 @@ describe "multiple inheritance", () ->
     expect(z.e()).toEqual(10)
     expect(z.f).toEqual([1, 2, 1, 2]) # The result of both instances
 
-  it "copies over the class properties", () ->
+  it "copies over the class (static) properties", () ->
     expect(A.m).toEqual(1)
     expect(A.n).toEqual(2)
     expect(B.m).toEqual(3)
@@ -69,10 +69,21 @@ describe "multiple inheritance", () ->
 
   it "does NOT have separate spaces for each instance, just like in normal prototypical code", () ->
     expect(y).not.toBe(z)
-    expect(y.prototype).toBe(z.prototype)
     expect(y.a).toBe(z.a)
     expect(y.b).toBe(z.b)
     expect(y.c).toBe(z.c)
     expect(y.d).toBe(z.d)
     expect(y.e).toBe(z.e)
     expect(y.f).toBe(z.f)
+
+  it "however has a `create()` method to create truly separate instances despite JavaScript's prototypical model", () ->
+    y = B::create()
+    z = B::create()
+
+    expect(y).not.toBe(z)
+    expect(y.a).toBe(z.a) # Primitive data
+    expect(y.b).not.toBe(z.b)
+    expect(y.c).not.toBe(z.c)
+    expect(y.d).toBe(z.d) # Function
+    expect(y.e).toBe(z.e) # Function
+    expect(y.f).not.toBe(z.f)
