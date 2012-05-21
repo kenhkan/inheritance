@@ -52,24 +52,18 @@ merge = function( original, introduced, context, key ) {
   // If either one is undefined or null, no need to merge, just copy the other one over
   if( _.isUndefined( original ) || _.isNull( original ) ||
       _.isUndefined( introduced ) || _.isNull( introduced ) ) {
-    ret( copy( original || introduced || null ) );
+    return ret( copy( original || introduced || null ) );
   }
 
   // If they're both arrays, concatenate them
   else if( Object.prototype.toString.apply( original ) === '[object Array]' &&
            Object.prototype.toString.apply( introduced ) === '[object Array]' ) {
-    ret( copy( original.concat( introduced ) ) );
-  }
-
-  // If they're both strings, prefer `introduced`
-  else if( Object.prototype.toString.apply( original ) === '[object String]' &&
-           Object.prototype.toString.apply( introduced ) === '[object String]' ) {
-    ret( copy( introduced ) );
+    return ret( copy( original.concat( introduced ) ) );
   }
 
   // If they're both objects, merge down
-  else if( typeof original === 'object' &&
-           typeof introduced === 'object' ) {
+  else if( Object.prototype.toString.apply( original ) === '[object Object]' &&
+           Object.prototype.toString.apply( introduced ) === '[object Object]' ) {
     var i, len, k, h;
     var obj = {};
     var oKeys = _.keys( original );
@@ -136,12 +130,12 @@ merge = function( original, introduced, context, key ) {
     }
 
     // Return
-    ret( obj );
+    return ret( obj );
   }
 
   // If they're both function objects *and* `isClass` is specified, it means that both objects are function objects. Create a cross-constructor and merge the prototype.
-  else if( typeof original === 'function' &&
-           typeof introduced === 'function' &&
+  else if( Object.prototype.toString.apply( original ) === '[object Function]' &&
+           Object.prototype.toString.apply( introduced ) === '[object Function]' &&
            ( original.prototype.isClass === true ||
              introduced.prototype.isClass === true ) ) {
     var staticKeys, staticKey, i, len;
@@ -190,12 +184,12 @@ merge = function( original, introduced, context, key ) {
     };
 
     // Return the merged function class
-    ret( Class );
+    return ret( Class );
   }
 
   // Otherwise, copy over `introduced` as it takes precedence
   else {
-    ret( copy( introduced ) );
+    return ret( copy( introduced ) );
   }
 };
 
