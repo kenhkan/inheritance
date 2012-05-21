@@ -11,6 +11,7 @@ describe "multiple inheritance", () ->
     d: () -> 1
     e: () -> 3
     f: []
+    g: (a) -> a + 4
     constructor: () -> @f.push(1)
 
   A.m = 1
@@ -22,6 +23,11 @@ describe "multiple inheritance", () ->
     c: { x: 11, z: 13 }
     d: () -> 2
     e: (s) -> s.uper() + 7
+    g: () ->
+      args = inherit.args(arguments)
+      supr = inherit.supr(arguments)
+      supr(args) + 4
+
     constructor: () -> @f.push(2)
 
   B.m = 3
@@ -44,6 +50,9 @@ describe "multiple inheritance", () ->
     expect(x.d()).toEqual(1)
     expect(x.e()).toEqual(3)
     expect(x.f).toEqual([1])
+
+  it "has the super function (as `supr`) at your disposal", () ->
+    expect(y.g(2)).toEqual(10)
 
   it "merges the properties for subclass", () ->
     expect(y.a).toEqual(11)

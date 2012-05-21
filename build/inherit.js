@@ -1,5 +1,8 @@
-_ = require("./underscore");
-owl = require("./deep_copy");
+_ = require("lib/underscore");
+owl = require("lib/deep_copy");
+
+// Dependencies are automatically added on build
+
 
 // Deep copying
 //
@@ -223,5 +226,41 @@ inherit = function() {
   return a;
 };
 
+// A helper function to parse the arguments so it returns only the super.
+//
+// @see inherit.args
+// @param {Object[]} functionArgs The function arguments to parse
+// @returns The super function; null if there is none
+inherit.supr = function(functionArgs) {
+  var args = _.toArray(functionArgs);
+  var s = args[args.length-1];
 
-module.exports = inherit
+  if(typeof s !== "undefined" && s !== null &&
+     s.isSuper === true) {
+    return s.uper;
+  } else {
+    return null;
+  }
+};
+
+// A helper function to parse the arguments so it returns only true arguments. You use this for inherited functions because the function arguments contain a reference to super as the last argument
+//
+// @see inherit.super
+// @param {Object[]} functionArgs The function arguments to parse
+// @returns The true arguments
+inherit.args = function(functionArgs) {
+  var args = _.toArray(functionArgs);
+  var s = args[args.length-1];
+
+  // Returns all but the last if there is a super
+  if(typeof s !== "undefined" && s !== null &&
+     s.isSuper === true) {
+    return args.slice(0, args.length-1);
+  // Otherwise, return the entire argument list
+  } else {
+    return args;
+  }
+};
+
+
+module.exports = inherit;
