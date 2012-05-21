@@ -32,16 +32,21 @@ copy = owl.deepCopy;
 //
 // Methods (properties that are functions) are tricky. Most of the time defining a method with the same name as the parent's means replacing the parent's implementation. However, because of the nature of multiple inheritance, sometimes you want to expand the functionality of a specific method rather than replace it. This is when we need #4 in the guidelines above. Note that either object can unilaterally declare merging.
 //
-// CPS is used in this implementation to allow the child function object's constructor to invoke both parents' constructors.
+// CPS is used in this implementation to allow the child function object's constructor to invoke both parents' constructors. You can also capture the return value if that is not needed.
 //
 // @param original The original value
 // @param introduced The introduced value
-// @param {Object} context The result of the merge will be stored into the property by the name of the next parameter in this object
-// @param {String} key This is the key of the context to store the merge in
+// @param {Object} [context] The result of the merge will be stored into the property by the name of the next parameter in this object
+// @param {String} [key] This is the key of the context to store the merge in
+// @returns Whatever the merged value is
 merge = function( original, introduced, context, key ) {
 
   var ret = function( value ) {
-    context[key] = value;
+    if( !_.isUndefined( key ) && !_.isNull( key ) ) {
+      context[key] = value;
+    }
+
+    return value;
   }
 
   // If either one is undefined or null, no need to merge, just copy the other one over
@@ -263,4 +268,5 @@ inherit.args = function(functionArgs) {
 };
 
 
+inherit.merge = merge;
 module.exports = inherit;
