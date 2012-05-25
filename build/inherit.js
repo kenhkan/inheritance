@@ -61,6 +61,60 @@ merge = function( original, introduced, context, key ) {
     return ret( copy( original.concat( introduced ) ) );
   }
 
+  // If they're both function objects *and* `isClass` is specified, it means that both objects are function objects. Create a cross-constructor and merge the prototype.
+  else if( Object.prototype.toString.apply( original ) === '[object Function]' &&
+           Object.prototype.toString.apply( introduced ) === '[object Function]' &&
+           ( original.prototype.isClass === true ||
+             introduced.prototype.isClass === true ) ) {
+    var staticKeys, staticKey, i, len;
+
+    // Create child function object
+    function Class() {
+      // Call constructors
+      original.apply( this, arguments );
+      introduced.apply( this, arguments );
+    }
+
+    // Merge the prototypes
+    merge( original.prototype, introduced.prototype, Class, 'prototype' );
+
+    // Set constructor
+    Class.prototype.constructor = Class;
+
+    // Merge its class properties but cannot use `merge()` because it'd trigger a stack overflow
+    ks = _.union( Object.keys(original), Object.keys(introduced) );
+
+    for( i=0, len=ks.length; i<len; i++ ) {
+      k = ks[i];
+
+      // Prototype has been copied over through merging
+      if( k !== 'prototype' ) {
+        merge( original[k], introduced[k], Class, k );
+      }
+    }
+
+    // Add a `create()` method so you can create truly separate instances
+    /*
+      Create a truly separate instance from this class
+
+      Modified from [Use of .apply() with 'new' operator. Is this possible?](http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible/#1608546)
+
+      @param args* The argument list to be passed to the constructor
+      @returns {Class} An instance of this class
+    */
+    Class.prototype.create = function() {
+      var args = _.toArray(arguments);
+      var ctor = this.constructor;
+      var C = function() { ctor.apply(this, args); }
+
+      C.prototype = copy(this);
+      return new C;
+    };
+
+    // Return the merged function class
+    return ret( Class );
+  }
+
   // If they're both objects, merge down
   else if( Object.prototype.toString.apply( original ) === '[object Object]' &&
            Object.prototype.toString.apply( introduced ) === '[object Object]' ) {
@@ -131,60 +185,6 @@ merge = function( original, introduced, context, key ) {
 
     // Return
     return ret( obj );
-  }
-
-  // If they're both function objects *and* `isClass` is specified, it means that both objects are function objects. Create a cross-constructor and merge the prototype.
-  else if( Object.prototype.toString.apply( original ) === '[object Function]' &&
-           Object.prototype.toString.apply( introduced ) === '[object Function]' &&
-           ( original.prototype.isClass === true ||
-             introduced.prototype.isClass === true ) ) {
-    var staticKeys, staticKey, i, len;
-
-    // Create child function object
-    function Class() {
-      // Call constructors
-      original.apply( this, arguments );
-      introduced.apply( this, arguments );
-    }
-
-    // Merge the prototypes
-    merge( original.prototype, introduced.prototype, Class, 'prototype' );
-
-    // Set constructor
-    Class.prototype.constructor = Class;
-
-    // Merge its class properties but cannot use `merge()` because it'd trigger a stack overflow
-    ks = _.union( Object.keys(original), Object.keys(introduced) );
-
-    for( i=0, len=ks.length; i<len; i++ ) {
-      k = ks[i];
-
-      // Prototype has been copied over through merging
-      if( k !== 'prototype' ) {
-        merge( original[k], introduced[k], Class, k );
-      }
-    }
-
-    // Add a `create()` method so you can create truly separate instances
-    /*
-      Create a truly separate instance from this class
-
-      Modified from [Use of .apply() with 'new' operator. Is this possible?](http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible/#1608546)
-
-      @param args* The argument list to be passed to the constructor
-      @returns {Class} An instance of this class
-    */
-    Class.prototype.create = function() {
-      var args = _.toArray(arguments);
-      var ctor = this.constructor;
-      var C = function() { ctor.apply(this, args); }
-
-      C.prototype = copy(this);
-      return new C;
-    };
-
-    // Return the merged function class
-    return ret( Class );
   }
 
   // Otherwise, copy over `introduced` as it takes precedence
