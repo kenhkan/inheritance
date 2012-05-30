@@ -90,7 +90,6 @@ merge = function( original, introduced, context, key ) {
       }
     }
 
-    // Add a `create()` method so you can create truly separate instances
     /*
       Create a truly separate instance from this class
 
@@ -104,7 +103,13 @@ merge = function( original, introduced, context, key ) {
       var ctor = this.constructor;
       var C = function() { ctor.apply(this, args); }
 
+      // Using `create()` replaces the constructor so this is for getting the underlying constructor
+      Class.prototype._constructor = this.constructor;
+
+      // Prototype
       C.prototype = copy(this);
+
+      // Return an instance of the wrapped class
       return new C;
     };
 
