@@ -56,14 +56,14 @@ merge = function( original, introduced, context, key ) {
   }
 
   // If they're both arrays, concatenate them
-  else if( Object.prototype.toString.apply( original ) === '[object Array]' &&
-           Object.prototype.toString.apply( introduced ) === '[object Array]' ) {
+  else if( _.isArray( original ) &&
+           _.isArray( introduced ) ) {
     return ret( copy( original.concat( introduced ) ) );
   }
 
   // If they're both function objects *and* `isClass` is specified, it means that both objects are function objects. Create a cross-constructor and merge the prototype.
-  else if( Object.prototype.toString.apply( original ) === '[object Function]' &&
-           Object.prototype.toString.apply( introduced ) === '[object Function]' &&
+  else if( _.isFunction( original ) &&
+           _.isFunction( introduced ) &&
            ( original.prototype.isClass === true ||
              introduced.prototype.isClass === true ) ) {
     var staticKeys, staticKey, i, len;
@@ -121,8 +121,8 @@ merge = function( original, introduced, context, key ) {
   }
 
   // If they're both objects, merge down
-  else if( Object.prototype.toString.apply( original ) === '[object Object]' &&
-           Object.prototype.toString.apply( introduced ) === '[object Object]' ) {
+  else if( _.isObject( original ) &&
+           _.isObject( introduced ) ) {
     var i, len, k, h;
     var obj = {};
     var oKeys = _.keys( original );
@@ -136,8 +136,8 @@ merge = function( original, introduced, context, key ) {
       k = commonKeys[i];
 
       // Call both methods if the property is a method
-      if( ( typeof original[k] === 'function' ) &&
-          ( typeof introduced[k] === 'function' ) ) {
+      if( _.isFunction( original[k] ) &&
+          _.isFunction( introduced[k] ) ) {
         // Wrapping function is needed to create a new scope for value preservation
         obj[k] = (function() {
           var f = original[k];
@@ -150,7 +150,7 @@ merge = function( original, introduced, context, key ) {
             var that = this;
 
             // If the last argument is the super function object, extract it
-            if( typeof fSuper === 'object' && fSuper.isSuper === true ) {
+            if( _.isObject( fSuper ) && fSuper.isSuper === true ) {
               args.pop();
             }
 
@@ -239,8 +239,7 @@ inherit.supr = function(functionArgs) {
   var args = _.toArray(functionArgs);
   var s = args[args.length-1];
 
-  if(typeof s !== "undefined" && s !== null &&
-     s.isSuper === true) {
+  if( !_.isUndefined( s ) && !_.isNull(s) && s.isSuper === true ) {
     return s.uper;
   } else {
     return null;
@@ -257,8 +256,7 @@ inherit.args = function(functionArgs) {
   var s = args[args.length-1];
 
   // Returns all but the last if there is a super
-  if(typeof s !== "undefined" && s !== null &&
-     s.isSuper === true) {
+  if( !_.isUndefined( s ) && !_.isNull(s) && s.isSuper === true ) {
     return args.slice(0, args.length-1);
   // Otherwise, return the entire argument list
   } else {
