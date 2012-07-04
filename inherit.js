@@ -157,7 +157,7 @@ merge = function( original, introduced, context, key ) {
             }
 
             // A new function of `f` to call `f` with the passed super
-            f2 = function() { return f.apply(that, args.concat([fSuper])); }
+            f2 = function() { return f.apply(that, _.toArray(arguments).concat([fSuper])); }
             gSuper = { isSuper: true, uper: f2 };
 
             // Call `g` with `f` as super
