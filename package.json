@@ -1,6 +1,7 @@
 {
   "name": "inheritance",
   "version": "0.1.0",
+  "main": "inherit.js",
   "dependencies": {
   },
   "devDependencies": {
