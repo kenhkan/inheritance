@@ -6,7 +6,7 @@ build-ti:
 build-node:
 	@rm -rf build
 	@make build
-	@echo "_ = require(\"./underscore\");\nowl = require(\"./deep_copy\");\n" | cat - build/inherit.js > /tmp/out && cp /tmp/out build/inherit.js
+	@echo "_ = require(\"underscore\");\nowl = require(\"owl-deepcopy\");\n" | cat - build/inherit.js > /tmp/out && cp /tmp/out build/inherit.js
 
 build:
 	@mkdir build

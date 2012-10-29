@@ -1,5 +1,5 @@
-_ = require("./underscore");
-owl = require("./deep_copy");
+_ = require("underscore");
+owl = require("owl-deepcopy");
 
 // Dependencies are automatically added on build
 
