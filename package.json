@@ -1,0 +1,14 @@
+{
+  "name": "inheritance",
+  "version": "0.1.0",
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "engine": {
+    "node": "0.8.4",
+    "npm": "1.1.24"
+  },
+  "scripts": {
+  }
+}
