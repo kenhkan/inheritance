@@ -1,6 +1,13 @@
 {
   "name": "inheritance",
+  "description": "Multiple inheritance and sensible merging of objects",
   "version": "0.1.0",
+  "author": "Kenneth Kan <kenhkan@gmail.com>",
+  "homepage": "https://github.com/kenhkan/inheritance",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kenhkan/inheritance.git"
+  }
   "main": "build/inherit.js",
   "dependencies": {
     "underscore": "1.3.3",
